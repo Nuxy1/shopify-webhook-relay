@@ -1,0 +1,17 @@
+{
+  "name": "webhook-relay",
+  "version": "1.0.0",
+  "description": "Shopify order webhooks to Google Sheets and Discord/Slack: verified, deduplicated, retried. No dependencies.",
+  "type": "module",
+  "main": "src/server.js",
+  "scripts": {
+    "start": "node --env-file-if-exists=.env src/server.js",
+    "test": "node --test",
+    "demo": "node --env-file-if-exists=.env scripts/send-test-webhook.js",
+    "replay": "node --env-file-if-exists=.env scripts/replay-dead-letters.js"
+  },
+  "engines": {
+    "node": ">=22"
+  },
+  "license": "MIT"
+}
