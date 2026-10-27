@@ -2,6 +2,8 @@
 
 Every new Shopify order lands as a clean row in a Google Sheet and pings your team on Discord or Slack. It happens within seconds, never twice, and is never silently lost.
 
+![Demo: the tests, a signed order arriving, the row it writes, a forged request refused](docs/demo.gif)
+
 ```mermaid
 flowchart LR
   S[Shopify<br/>orders/create] -->|signed webhook| R[Relay]
