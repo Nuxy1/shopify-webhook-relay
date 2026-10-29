@@ -135,6 +135,10 @@ test("csv escapes commas, quotes and newlines", () => {
   assert.equal(csvLine(["a", "b,c", 'say "hi"', "x\ny", 3]), 'a,"b,c","say ""hi""","x\ny",3\n');
 });
 
+test("csv: a customer's name that would run as a formula opens as text, numbers don't change", () => {
+  assert.equal(csvLine(["=cmd|' /C calc'!A0", "@SUM(A1)", "-2+3", "-12.50", "+15550104477"]), "'=cmd|' /C calc'!A0,'@SUM(A1),'-2+3,-12.50,+15550104477\n");
+});
+
 test("sheets: a valid RS256 service-account JWT, then an append with its token", async () => {
   const { privateKey, publicKey } = generateKeyPairSync("rsa", { modulusLength: 2048 });
   const account = { client_email: "relay@demo.iam.gserviceaccount.com", private_key: privateKey.export({ type: "pkcs8", format: "pem" }) };
@@ -150,10 +154,10 @@ test("sheets: a valid RS256 service-account JWT, then an append with its token",
   };
   const sink = sheetsSink({ account, spreadsheetId: "sheet123", range: "Orders!A1", fetchImpl });
   await sink.write(["#1042", 3]);
-  await sink.write(["#1043", 1]);
+  await sink.write(["#1043", 1, '=IMPORTXML("http://x.example","//a")']);
   assert.equal(calls.filter((call) => call.url.includes("oauth2")).length, 1); // (token cached)
   const append = calls.at(-1);
   assert.match(append.url, /spreadsheets\/sheet123\/values\/Orders!A1:append\?valueInputOption=USER_ENTERED/);
   assert.equal(append.init.headers.authorization, "Bearer tok");
-  assert.deepEqual(JSON.parse(append.init.body), { values: [["#1043", 1]] });
+  assert.deepEqual(JSON.parse(append.init.body), { values: [["#1043", 1, `'=IMPORTXML("http://x.example","//a")`]] });
 });
