@@ -1,5 +1,6 @@
 import { createSign } from "node:crypto";
 import { fetchOk } from "../retry.js";
+import { formulaSafe } from "./csv.js";
 
 const SCOPE = "https://www.googleapis.com/auth/spreadsheets";
 const base64url = (data) => Buffer.from(data).toString("base64url");
@@ -41,7 +42,8 @@ export function sheetsSink({ account, spreadsheetId, range = "Orders!A1", fetchI
       await fetchOk(fetchImpl, url, {
         method: "POST",
         headers: { authorization: `Bearer ${await accessToken()}`, "content-type": "application/json" },
-        body: JSON.stringify({ values: [values] }),
+        // (USER_ENTERED runs a cell starting with "=" as a formula; with a leading ' Sheets keeps it as text and hides the ')
+        body: JSON.stringify({ values: [values.map((value) => (typeof value === "string" ? formulaSafe(value) : value))] }),
       });
     },
   };
